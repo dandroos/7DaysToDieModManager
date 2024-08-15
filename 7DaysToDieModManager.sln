@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "7DaysToDieModManager", "7DaysToDieModManager.csproj", "{AAC4F55E-1E94-41CE-8BB0-7BBA79D00BDE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AAC4F55E-1E94-41CE-8BB0-7BBA79D00BDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAC4F55E-1E94-41CE-8BB0-7BBA79D00BDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAC4F55E-1E94-41CE-8BB0-7BBA79D00BDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAC4F55E-1E94-41CE-8BB0-7BBA79D00BDE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {92A56928-F4B2-47DD-9B4A-A17EF5C50813}
+	EndGlobalSection
+EndGlobal

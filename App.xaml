@@ -1,0 +1,42 @@
+﻿<Application x:Class="_7DaysToDieModManager.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- Define the Marsden Slim SemiBold font -->
+            <FontFamily x:Key="MarsdenSlimSemiBoldFont">/Fonts/#Marsden Slim SemiBold</FontFamily>
+
+            <!-- Style for DataGridCell --><!--
+            <Style TargetType="DataGridCell">
+                <Setter Property="FontFamily" Value="{StaticResource MarsdenSlimSemiBoldFont}"/>
+                <Setter Property="FontSize" Value="21"/>
+                --><!-- 50% increase from 14 --><!--
+            </Style>
+
+            --><!-- Style for DataGridColumnHeader --><!--
+            <Style TargetType="DataGridColumnHeader">
+                <Setter Property="FontFamily" Value="{StaticResource MarsdenSlimSemiBoldFont}"/>
+                <Setter Property="FontSize" Value="21"/>
+                --><!-- 50% increase from 14 --><!--
+                <Setter Property="FontWeight" Value="Bold"/>
+            </Style>
+
+            --><!-- Global TextBlock Style --><!--
+            <Style TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource MarsdenSlimSemiBoldFont}"/>
+                <Setter Property="FontSize" Value="24"/>
+                --><!-- Adjust as needed --><!--
+            </Style>
+
+            --><!-- Global Button Style --><!--
+            <Style TargetType="Button">
+                <Setter Property="FontFamily" Value="{StaticResource MarsdenSlimSemiBoldFont}"/>
+                <Setter Property="FontSize" Value="21"/>
+                --><!-- Adjust as needed --><!--
+            </Style>-->
+
+           
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
