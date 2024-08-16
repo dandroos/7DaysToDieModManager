@@ -7,6 +7,8 @@ using SevenZipExtractor;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Diagnostics;
+using System.Windows.Media;
+using System.Reflection;
 
 namespace _7DaysToDieModManager
 {
@@ -16,20 +18,105 @@ namespace _7DaysToDieModManager
     /// </summary>
     public partial class MainWindow : Window
     {
-        // Path to the main Mods directory
-        private const string ModsFolderPath = @"C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die\Mods";
         // Name of the folder where inactive mods are stored
         private const string InactiveFolderName = "Inactive";
         // Path to the game executable
-        private const string GameExecutablePath = @"C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die\7DaysToDie.exe"; // Update to your actual path
+        private string GameExecutablePath => Path.Combine(GameDirectory, "7DaysToDie.exe");
 
         // Collection to hold the list of mods
         private ObservableCollection<Mod> _mods;
 
+        // Get the path to the main Mods directory based on the user's game directory
+        private string ModsFolderPath => Path.Combine(GameDirectory, "Mods");
+
+        // Path to the user's selected game directory
+        private string GameDirectory => Properties.Settings.Default.GameDirectory;
+
         public MainWindow()
         {
             InitializeComponent();
+            CheckGameDirectory();
+           
             LoadMods(); // Load the list of mods when the window initializes
+        }
+
+        private void CheckGameDirectory()
+        {
+            string defaultGameDirectory = @"C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die";
+            string gameDirectory = Properties.Settings.Default.GameDirectory;
+
+            // If the game directory is not set, check the default location
+            if (string.IsNullOrEmpty(gameDirectory))
+            {
+                if (Directory.Exists(defaultGameDirectory))
+                {
+                    // Save the default path to settings
+                    Properties.Settings.Default.GameDirectory = defaultGameDirectory;
+                    Properties.Settings.Default.Save();
+                }
+                else
+                {
+                    // Prompt the user to manually select the game directory
+                    var result = MessageBoxHelper.ShowCentered(this, "Game directory not found in the default location. Would you like to browse for the directory?",
+                                                 "Game Directory Not Found",
+                                                 MessageBoxButton.YesNo,
+                                                 MessageBoxImage.Warning);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+                        {
+                            var dialogResult = dialog.ShowDialog();
+
+                            if (dialogResult == System.Windows.Forms.DialogResult.OK)
+                            {
+                                gameDirectory = dialog.SelectedPath;
+
+                                // Save the selected path for future use
+                                Properties.Settings.Default.GameDirectory = gameDirectory;
+                                Properties.Settings.Default.Save();
+                            }
+                            else
+                            {
+                                MessageBoxHelper.ShowCentered(this, "No directory selected. The application will exit.");
+                                Application.Current.Shutdown();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Exit the application if the user chooses not to select a directory
+                        Application.Current.Shutdown();
+                    }
+                }
+            }
+            else
+            {
+                // Check if the stored game directory exists
+                if (!Directory.Exists(gameDirectory))
+                {
+                    MessageBoxHelper.ShowCentered(this, "The stored game directory is no longer valid. Please select the correct game directory.");
+
+                    using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+                    {
+                        var dialogResult = dialog.ShowDialog();
+
+                        if (dialogResult == System.Windows.Forms.DialogResult.OK)
+                        {
+                            gameDirectory = dialog.SelectedPath;
+
+                            // Save the selected path for future use
+                            Properties.Settings.Default.GameDirectory = gameDirectory;
+                            Properties.Settings.Default.Save();
+                        }
+                        else
+                        {
+                            MessageBoxHelper.ShowCentered(this, "No directory selected. The application will exit.");
+                            Application.Current.Shutdown();
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -132,7 +219,7 @@ namespace _7DaysToDieModManager
         /// </summary>
         private void OnUpdateClick(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Update button clicked.");
+            MessageBoxHelper.ShowCentered(this, "Update button clicked.");
         }
 
         /// <summary>
@@ -149,12 +236,12 @@ namespace _7DaysToDieModManager
                     // Check if the mod is "Harmony Wrapper"
                     if (mod.Name.Equals("Harmony Wrapper", StringComparison.OrdinalIgnoreCase))
                     {
-                        MessageBox.Show("The 'Harmony Wrapper' mod is essential and cannot be deleted.", "Deletion Not Allowed", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBoxHelper.ShowCentered(this, "The 'Harmony Wrapper' mod is essential and cannot be deleted.", "Deletion Not Allowed", MessageBoxButton.OK, MessageBoxImage.Information);
                         return;
                     }
 
                     // Prompt the user to confirm deletion
-                    var result = MessageBox.Show($"Are you sure you want to delete the mod \"{mod.Name}\"?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    var result = MessageBoxHelper.ShowCentered(this, $"Are you sure you want to delete the mod \"{mod.Name}\"?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
                     if (result == MessageBoxResult.Yes)
                     {
@@ -163,14 +250,14 @@ namespace _7DaysToDieModManager
                             // Delete the mod directory and all its contents
                             Directory.Delete(mod.DirectoryPath, true);
 
-                            MessageBox.Show("Mod deleted successfully.");
+                            MessageBoxHelper.ShowCentered(this,"Mod deleted successfully.");
 
                             // Refresh the mod list
                             LoadMods();
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show($"An error occurred while deleting the mod: {ex.Message}");
+                            MessageBoxHelper.ShowCentered(this, $"An error occurred while deleting the mod: {ex.Message}");
                         }
                     }
                 }
@@ -183,6 +270,7 @@ namespace _7DaysToDieModManager
         /// </summary>
         private void OnDrop(object sender, DragEventArgs e)
         {
+            var border = sender as Border;
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 var files = e.Data.GetData(DataFormats.FileDrop) as string[];
@@ -193,7 +281,8 @@ namespace _7DaysToDieModManager
                 // Check if the file is a zip or 7z archive
                 if (!IsValidArchive(filePath))
                 {
-                    MessageBox.Show("Please drop a valid zip or 7z file.");
+                    MessageBoxHelper.ShowCentered(this,"Please drop a valid zip or 7z file.");
+                    ResetBorderBackground(border);
                     return;
                 }
 
@@ -202,18 +291,19 @@ namespace _7DaysToDieModManager
                 {
                     if (ExtractAndValidateArchive(filePath))
                     {
-                        MessageBox.Show("Mod installed successfully.");
+                        MessageBoxHelper.ShowCentered(this, "Mod installed successfully.");
                         LoadMods(); // Refresh the mod list
                     }
                     else
                     {
-                        MessageBox.Show("Invalid mod structure. The archive must contain a directory with a ModInfo.xml file.");
+                        MessageBoxHelper.ShowCentered(this, "Invalid mod structure. The archive must contain a directory with a ModInfo.xml file.");
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"An error occurred: {ex.Message}");
+                    MessageBoxHelper.ShowCentered(this, $"An error occurred: {ex.Message}");
                 }
+                ResetBorderBackground(border);
             }
         }
 
@@ -323,7 +413,7 @@ namespace _7DaysToDieModManager
                     {
                         // Prevent changing the state of the Harmony Wrapper mod
                         checkBox.IsChecked = false;
-                        MessageBox.Show("The 'Harmony Wrapper' mod cannot be deactivated.", "Action Not Allowed", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBoxHelper.ShowCentered(this, "The 'Harmony Wrapper' mod cannot be deactivated.", "Action Not Allowed", MessageBoxButton.OK, MessageBoxImage.Information);
                         return;
                     }
 
@@ -350,7 +440,7 @@ namespace _7DaysToDieModManager
                     {
                         // Prevent changing the state of the Harmony Wrapper mod
                         checkBox.IsChecked = true;
-                        MessageBox.Show("The 'Harmony Wrapper' mod cannot be deactivated.", "Action Not Allowed", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBoxHelper.ShowCentered(this, "The 'Harmony Wrapper' mod cannot be deactivated.", "Action Not Allowed", MessageBoxButton.OK, MessageBoxImage.Information);
                         return;
                     }
 
@@ -430,7 +520,7 @@ namespace _7DaysToDieModManager
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to launch the game: {ex.Message}");
+                MessageBoxHelper.ShowCentered(this, $"Failed to launch the game: {ex.Message}");
             }
         }
 
@@ -450,8 +540,39 @@ namespace _7DaysToDieModManager
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to open the Mods folder: {ex.Message}");
+                MessageBoxHelper.ShowCentered(this, $"Failed to open the Mods folder: {ex.Message}");
             }
         }
+
+        public static class MessageBoxHelper
+        {
+            public static MessageBoxResult ShowCentered(Window owner, string messageBoxText, string caption = "", MessageBoxButton button = MessageBoxButton.OK, MessageBoxImage icon = MessageBoxImage.None)
+            {
+                return MessageBox.Show(owner, messageBoxText, caption, button, icon);
+            }
+        }
+
+        private void ResetBorderBackground(Border border)
+        {
+            border.Background = new SolidColorBrush(Color.FromArgb(0x80, 0x00, 0x00, 0x00)); // Reset to original background
+        }
+
+        private void Border_DragEnter(object sender, DragEventArgs e)
+        {
+            var border = sender as Border;
+            border.Background = new SolidColorBrush(Color.FromArgb(0xAA, 0x00, 0x00, 0x00)); // Lighter background
+        }
+
+        private void Border_DragLeave(object sender, DragEventArgs e)
+        {
+            var border = sender as Border;
+            ResetBorderBackground(border); // Reset when the drag leaves
+        }
+
+        private void Border_DragOver(object sender, DragEventArgs e)
+        {
+            e.Handled = true; // Optional: Keeps the border lightened while dragging over it
+        }
+
     }
 }
