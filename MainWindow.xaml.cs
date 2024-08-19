@@ -9,6 +9,8 @@ using System.Linq;
 using System.Diagnostics;
 using System.Windows.Media;
 using System.Reflection;
+using System.Windows.Input;
+using Microsoft.Win32;
 
 namespace _7DaysToDieModManager
 {
@@ -304,6 +306,43 @@ namespace _7DaysToDieModManager
                     MessageBoxHelper.ShowCentered(this, $"An error occurred: {ex.Message}");
                 }
                 ResetBorderBackground(border);
+            }
+        }
+
+        private void DropZone_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            // Open a file dialog to let the user select a mod file
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Mod Files (*.zip;*.7z)|*.zip;*.7z|All files (*.*)|*.*";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                var filePath = openFileDialog.FileName;
+
+                // Check if the file is a zip or 7z archive
+                if (!IsValidArchive(filePath))
+                {
+                    MessageBoxHelper.ShowCentered(this, "Please select a valid zip or 7z file.");
+                    return;
+                }
+
+                // Validate and extract the archive
+                try
+                {
+                    if (ExtractAndValidateArchive(filePath))
+                    {
+                        MessageBoxHelper.ShowCentered(this, "Mod installed successfully.");
+                        LoadMods(); // Refresh the mod list
+                    }
+                    else
+                    {
+                        MessageBoxHelper.ShowCentered(this, "Invalid mod structure. The archive must contain a directory with a ModInfo.xml file.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBoxHelper.ShowCentered(this, $"An error occurred: {ex.Message}");
+                }
             }
         }
 

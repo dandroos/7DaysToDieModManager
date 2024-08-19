@@ -192,8 +192,8 @@
             <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                     Margin="10" Height="200" AllowDrop="True" Drop="OnDrop"
                     Background="#80000000" BorderBrush="White" BorderThickness="2"
-                    DragEnter="Border_DragEnter" DragLeave="Border_DragLeave" DragOver="Border_DragOver">
-                <TextBlock Text="DRAG AND DROP MOD ZIP FILES HERE TO INSTALL" 
+                    DragEnter="Border_DragEnter" DragLeave="Border_DragLeave" DragOver="Border_DragOver" MouseLeftButtonUp="DropZone_MouseLeftButtonUp">
+                <TextBlock Text="DRAG AND DROP MOD ZIP FILES HERE TO INSTALL OR CLICK TO BROWSE" 
                            FontFamily="{StaticResource MarsdenSlimSemiBoldFont}"
                            VerticalAlignment="Center" 
                            HorizontalAlignment="Center" FontSize="30" FontWeight="Bold" Foreground="White"/>
